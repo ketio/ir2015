@@ -11,16 +11,16 @@ for f in fs:
 	f_name = f.replace("_"," ").replace("."," ").split()
 	class_name = f_name[0]
 	file_number = f_name[1]
-	# if int(file_number) < 20:
-	if int(file_number) % 2 == 1:
-		
-		if class_name not in trainging_data:
-			trainging_data[class_name] = list()
-		trainging_data[class_name].append("%s_%s" % (class_name, file_number))
+	if int(file_number) < 20:
+		if int(file_number) % 2 == 1:
+			
+			if class_name not in trainging_data:
+				trainging_data[class_name] = list()
+			trainging_data[class_name].append("%s_%s" % (class_name, file_number))
 
-	else:
+		else:
 
-		testing_docs.append("%s_%s" % (class_name, file_number))
+			testing_docs.append("%s_%s" % (class_name, file_number))
 
 # print(trainging_data)
 # print(testing_data)

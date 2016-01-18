@@ -17,11 +17,11 @@ def selectFeatures(V, classes_docs, ds_v, k):
 
 	# `llr` is a dictionary to store result, each element is the score of certain term
 	# i.e `llr` = { term1: point1, term2: point2,...}
-	llr = dict()
+	llrs = dict()
 
 	# go through each class
 	for _class, _class_documents in classes_docs.iteritems():
-
+		llrs[_class] = dict()
 		# culutate likelihood for every term in V
 		for t in V:
 			n11 = 0
@@ -56,24 +56,24 @@ def selectFeatures(V, classes_docs, ds_v, k):
 			denominator = math.pow(B, n11)*math.pow(1-B, n10)*math.pow(C, n01)*math.pow(1-C, n00)
 			temp = -2.0 * math.log((numerator)/(denominator))
 			
-			# store score
-			if t not in llr:
-				llr[t] = temp
-			else:
-				llr[t] += temp
+			llrs[_class][t] = temp
 
-	# conver dict to tuple list, i.e [(term1, point1), (term2, point2),...]
-	llr = llr.items()
+	new_Vs = dict()
 
-	# sort by score
-	llr = sorted(llr, key=lambda x:x[1],reverse = True)
+	for _class, llr in llrs.items():
+		# conver dict to tuple list, i.e [(term1, point1), (term2, point2),...]
+		llr_tuple = llr.items()
 
-	# `new_v` is a list, storing top k score terms 
-	new_V = list()
-	for i in range(0,k):
-		new_V.append(llr[i][0])
+		# sort by score
+		llr_tuple = sorted(llr_tuple, key=lambda x:x[1],reverse = True)
 
-	return new_V
+		# `new_v` is a list, storing top k score terms 
+		new_Vs[_class] = list()
+
+		for i in range(0,k):
+			new_V[_class].append(llr_tuple[i][0])
+
+	return new_Vs
 
 # Training
 # 	@classes_docs = { class1: [doc1, doc2,...], class2: [doc1', doc2',...],..}
@@ -112,9 +112,8 @@ def TrainMultinomialNB(classes_docs):
 	condprob = dict()
 
 	# do select feature
-	new_V = selectFeatures(V, classes_docs, ds_v, 500)
+	new_Vs = selectFeatures(V, classes_docs, ds_v, 500)
 	# new_V = V
-
 
 	# go through each class
 	for _class, documents in classes_docs.iteritems():
@@ -125,6 +124,8 @@ def TrainMultinomialNB(classes_docs):
 		# calcuate prior of current class 
 		prior[_class] = float(N_c) / N
 
+	for _class, documents in classes_docs.iteritems():
+		new_V = new_Vs[_class]
 		# `text_c` is used to store all terms in doucments of current class 
 		text_c = list()
 		for document in documents:
