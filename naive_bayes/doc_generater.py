@@ -4,7 +4,7 @@ import jieba
 import jieba.posseg as pseg
 import stopWords
 import tokenizer
-jieba.set_dictionary('./dict/dict.txt.big')
+
 JUSKY_NAME = "./JUKSY.csv"
 PTT01_NAME = "./PTT01.csv"
 FUNNYJOKE_NAME = "./FUNNYJOKE.csv"

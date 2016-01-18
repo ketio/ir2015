@@ -1,7 +1,7 @@
 #coding=UTF-8
 from naive_bayes import testing
 
-doc = "貓貓狗狗吃貓吃狗狗吃貓貓吃狗毛小孩喵星人狗狗狗狗狗狗喵喵喵貓貓貓貓"
+doc = "李昱賢吃的這麼胖讓我好感動QQ"
 result = testing.NBtesting(doc)
 
 print(result)
