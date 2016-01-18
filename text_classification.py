@@ -26,11 +26,14 @@ for f in fs:
 # print(testing_data)
 
 # train result = (V, prior, condprob)	
-train_result = naive_bayes.TrainMultinomialNB(trainging_data)
-
+classifier1 = naive_bayes.TrainMultinomialNB(trainging_data,"1")
+classifier2 = naive_bayes.TrainMultinomialNB(trainging_data,"2")
+classifier3 = naive_bayes.TrainMultinomialNB(trainging_data,"3")
+classifier4 = naive_bayes.TrainMultinomialNB(trainging_data,"4")
+classifier5 = naive_bayes.TrainMultinomialNB(trainging_data,"5")
 ffff = open("result.txt","w")
 
-for term, cles in train_result[2].items():
+for term, cles in classifier1[2].items():
 	for cl, condprob in cles.items():
 		oooo = "%s: %s : %f\n" % (term.encode('utf-8'), cl, condprob)
 		ffff.write(oooo)
@@ -53,9 +56,16 @@ result = dict()
 # 		result[d] = naive_bayes.ApplyMultinomialNB(classes_docs, train_result[0], train_result[1], train_result[2], d)
 
 for doc in testing_docs:
- 	result[doc] = naive_bayes.ApplyMultinomialNB(trainging_data, train_result[0], train_result[1], train_result[2], doc)
+ 	result[doc]=dict()
+ 	result[doc][1] = naive_bayes.ApplyMultinomialNB(trainging_data, classifier1[0], classifier1[1], classifier1[2], doc)
+ 	result[doc][2] = naive_bayes.ApplyMultinomialNB(trainging_data, classifier2[0], classifier2[1], classifier2[2], doc)
+ 	result[doc][3] = naive_bayes.ApplyMultinomialNB(trainging_data, classifier3[0], classifier3[1], classifier3[2], doc)
+ 	result[doc][4] = naive_bayes.ApplyMultinomialNB(trainging_data, classifier4[0], classifier4[1], classifier4[2], doc)
+ 	result[doc][5] = naive_bayes.ApplyMultinomialNB(trainging_data, classifier5[0], classifier5[1], classifier5[2], doc)
 
+print(result)
 
+'''
 # Let `term_df` sort by key(term) in dictionary order
 result = collections.OrderedDict(sorted(result.items()))
 output_data = open("output.txt", "w")
@@ -92,4 +102,4 @@ output_data.write("doc_id\tclass_id\n" )
 for (doc_id,class_id) in result.iteritems():		
 	output_data.write("%s\t%s\n" % (doc_id, class_id))
 
-
+'''

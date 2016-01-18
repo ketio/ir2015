@@ -7,7 +7,7 @@ import math
 # 	@classes_docs = { class1: [doc1, doc2,...], class2: [doc1', doc2',...],..}
 # 	@de_v = { doc_1 :[v1, v2, v3,...], doc_2: [v1', v2', v3',...],...}
 # 	@k = number
-def selectFeatures(V, classes_docs, ds_v, k):
+def selectFeatures(V, classes_docs, feature_class, ds_v, k):
 
 	# save to all documment in each class to `all_document` 
 	all_document = list(d for (_c, _ds) in classes_docs.iteritems() for d in _ds)
@@ -17,67 +17,61 @@ def selectFeatures(V, classes_docs, ds_v, k):
 
 	# `llr` is a dictionary to store result, each element is the score of certain term
 	# i.e `llr` = { term1: point1, term2: point2,...}
-	llrs = dict()
+	llr = list()
 
-	# go through each class
-	for _class, _class_documents in classes_docs.iteritems():
-		llrs[_class] = dict()
-		# culutate likelihood for every term in V
-		for t in V:
-			n11 = 0
-			n10 = 0
-			n01 = 0
-			n00 = 0
+	_class_documents = classes_docs[feature_class]
 
-			# go through all document
-			for _d in all_document:
+	# culutate likelihood for every term in V
+	for t in V:
+		n11 = 0
+		n10 = 0
+		n01 = 0
+		n00 = 0
 
-				# check if the document belong to the current class
-				if _d in _class_documents:
+		# go through all document
+		for _d in all_document:
 
-					# check if term in document
-					if t in ds_v[_d]:
-						n11 += 1
-					else:
-						n10 += 1
+			# check if the document belong to the current class
+			if _d in _class_documents:
+
+				# check if term in document
+				if t in ds_v[_d]:
+					n11 += 1
 				else:
+					n10 += 1
+			else:
 
-					# check if term in document
-					if t in ds_v[_d]:
-						n01 += 1
-					else:
-						n00 += 1
+				# check if term in document
+				if t in ds_v[_d]:
+					n01 += 1
+				else:
+					n00 += 1
 
-			# calcuate llr
-			A = float(n11+n01)/ N
-			B = float(n11)/(n11+n10)
-			C = float(n01)/(n01+n00)
-			numerator = math.pow(A, n11)*math.pow(1-A, n10)*math.pow(A, n01)*math.pow(1-A, n00)
-			denominator = math.pow(B, n11)*math.pow(1-B, n10)*math.pow(C, n01)*math.pow(1-C, n00)
-			temp = -2.0 * math.log((numerator)/(denominator))
-			
-			llrs[_class][t] = temp
+		# calcuate llr
+		A = float(n11+n01)/ N
+		B = float(n11)/(n11+n10)
+		C = float(n01)/(n01+n00)
+		numerator = math.pow(A, n11)*math.pow(1-A, n10)*math.pow(A, n01)*math.pow(1-A, n00)
+		denominator = math.pow(B, n11)*math.pow(1-B, n10)*math.pow(C, n01)*math.pow(1-C, n00)
+		temp = -2.0 * math.log((numerator)/(denominator))
+		
+		llr.append((t, temp))
 
-	new_Vs = dict()
+	new_V = list()
 
-	for _class, llr in llrs.items():
-		# conver dict to tuple list, i.e [(term1, point1), (term2, point2),...]
-		llr_tuple = llr.items()
+	# sort by score
+	llr = sorted(llr, key=lambda x:x[1],reverse = True)
 
-		# sort by score
-		llr_tuple = sorted(llr_tuple, key=lambda x:x[1],reverse = True)
+	# `new_v` is a list, storing top k score terms 
 
-		# `new_v` is a list, storing top k score terms 
-		new_Vs[_class] = list()
+	for i in range(0,k):
+		new_V.append(llr[i][0])
 
-		for i in range(0,k):
-			new_V[_class].append(llr_tuple[i][0])
-
-	return new_Vs
+	return new_V
 
 # Training
 # 	@classes_docs = { class1: [doc1, doc2,...], class2: [doc1', doc2',...],..}
-def TrainMultinomialNB(classes_docs):
+def TrainMultinomialNB(classes_docs, feature_class):
 	
 	# `V` is a set used to store Vocabularies in all documents of each class 
 	V = set()
@@ -112,7 +106,7 @@ def TrainMultinomialNB(classes_docs):
 	condprob = dict()
 
 	# do select feature
-	new_Vs = selectFeatures(V, classes_docs, ds_v, 500)
+	new_V = selectFeatures(V, classes_docs, feature_class, ds_v, 100)
 	# new_V = V
 
 	# go through each class
@@ -124,8 +118,6 @@ def TrainMultinomialNB(classes_docs):
 		# calcuate prior of current class 
 		prior[_class] = float(N_c) / N
 
-	for _class, documents in classes_docs.iteritems():
-		new_V = new_Vs[_class]
 		# `text_c` is used to store all terms in doucments of current class 
 		text_c = list()
 		for document in documents:
@@ -167,10 +159,15 @@ def ApplyMultinomialNB(classes_docs, V, prior, condprob, d):
 
 	# go through all class
 	for _class, documents in classes_docs.iteritems():
+		
 		score[_class] = math.log(prior[_class])
 		for t in W:
+			
 			if t in condprob:
+				print(condprob[t])
+
 				score[_class] += math.log( condprob[t][_class] )
 
 	#return the class with bigger score
-	return max(score, key=score.get) 	
+	return max(score, key=score.get)
+
