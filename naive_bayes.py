@@ -1,5 +1,5 @@
 #coding=UTF-8
-from terms_extracter.terms_extracter import terms_extracter
+# from terms_extracter.terms_extracter import terms_extracter
 import math
 
 # selectFeatures: Likelihood method 
